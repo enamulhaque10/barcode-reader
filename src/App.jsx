@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
+import { upsertScannedItem } from "./barcodeUtils";
 
 const SKU_MODEL_MAP = {
   "7400000001": "SRREF-SS100-FBDS260V",
@@ -212,16 +213,7 @@ function App() {
     const skuKey = code.slice(0, 10);
     const modelName = SKU_MODEL_MAP[skuKey] || "Model not found";
 
-    setItems((prev) => [
-      {
-        barcode: code,
-        sku: skuKey,
-        description: modelName,
-        quantity: "-",
-        status: modelName === "Model not found" ? "Not Found" : "Found",
-      },
-      ...prev,
-    ]);
+    setItems((prev) => upsertScannedItem(prev, code, skuKey, modelName));
 
     setBarcode("");
     setLoading(false);
