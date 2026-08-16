@@ -75,9 +75,9 @@ function App() {
     setLoading(true);
     setMessage("");
 
-    // Support single barcode or multiple comma-separated values
+    // Support single barcode or multiple comma/newline-separated values
     const codes = raw
-      .split(",")
+      .split(/[,\n]/)
       .map((c) => c.trim())
       .filter(Boolean);
 
