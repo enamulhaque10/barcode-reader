@@ -3,7 +3,7 @@ import "./App.css";
 import { upsertScannedItem } from "./barcodeUtils";
 
 // SKU -> Model mapping is loaded from public/sku-models.csv at runtime.
-// Place a CSV file at `public/sku-models.csv` with a header `sku,model`.
+// The CSV supports the header `category,sku,model` and also tolerates tab-delimited rows.
 
 function App() {
   const [barcode, setBarcode] = useState("");
@@ -14,6 +14,39 @@ function App() {
   const [skuMapLoaded, setSkuMapLoaded] = useState(false);
 
   const inputRef = useRef(null);
+
+  const parseSkuRow = (line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return null;
+
+    const tabColumns = trimmed
+      .split("\t")
+      .map((part) => part.replace(/^"|"$/g, "").trim())
+      .filter(Boolean);
+
+    if (tabColumns.length >= 3) {
+      return {
+        category: tabColumns[0],
+        sku: tabColumns[1],
+        model: tabColumns.slice(2).join(","),
+      };
+    }
+
+    const commaColumns = trimmed
+      .split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)
+      .map((part) => part.replace(/^"|"$/g, "").trim());
+
+    if (commaColumns.length >= 3) {
+      const [category, sku, ...modelParts] = commaColumns;
+      return {
+        category: category || "Unknown",
+        sku: sku || "",
+        model: modelParts.join(","),
+      };
+    }
+
+    return null;
+  };
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -31,20 +64,26 @@ function App() {
         const text = await res.text();
         const map = {};
         const lines = text.split(/\r?\n/);
+
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
-          // skip header if present
-          if (i === 0 && /^\s*sku\s*,/i.test(line)) continue;
-          // split on first comma to allow commas in model name
-          const idx = line.indexOf(",");
-          if (idx === -1) continue;
-          const sku = line.slice(0, idx).replace(/"/g, "").trim();
-          const model = line.slice(idx + 1).replace(/"/g, "").trim();
-          if (sku) map[sku] = model;
+
+          if (i === 0 && /^(category\s*,\s*sku\s*,\s*model|sku\s*,\s*model)/i.test(line)) {
+            continue;
+          }
+
+          const row = parseSkuRow(line);
+          if (!row || !row.sku) continue;
+
+          map[row.sku] = {
+            model: row.model,
+            category: row.category || "Unknown",
+          };
         }
-          setSkuModelMap(map);
-          setSkuMapLoaded(true);
+
+        setSkuModelMap(map);
+        setSkuMapLoaded(true);
       } catch (err) {
         console.error("Failed to load sku-models.csv:", err);
         setSkuMapLoaded(true); // avoid blocking forever — allow searches though map may be empty
@@ -77,7 +116,7 @@ function App() {
 
     // Support single barcode or multiple comma/newline-separated values
     const codes = raw
-      .split(/[,\n]/)
+      .split(/[ ,\n]/)
       .map((c) => c.trim())
       .filter(Boolean);
 
@@ -85,8 +124,10 @@ function App() {
       let updated = prev;
       for (const code of codes) {
         const skuKey = code.slice(0, 10);
-        const modelName = skuModelMap[skuKey] || "Model not found";
-        updated = upsertScannedItem(updated, code, skuKey, modelName);
+        const skuEntry = skuModelMap[skuKey];
+        const modelName = skuEntry?.model || "Model not found";
+        const categoryName = skuEntry?.category || "Unknown";
+        updated = upsertScannedItem(updated, code, skuKey, modelName, categoryName);
       }
       return updated;
     });
@@ -111,6 +152,19 @@ function App() {
     setMessage("");
     inputRef.current?.focus();
   };
+
+  const sortedItems = [...items].sort((a, b) => {
+    const catA = String(a.category || "Unknown").toLowerCase();
+    const catB = String(b.category || "Unknown").toLowerCase();
+
+    if (catA !== catB) {
+      return catA.localeCompare(catB);
+    }
+
+    const modelA = String(a.model || a.description || "").toLowerCase();
+    const modelB = String(b.model || b.description || "").toLowerCase();
+    return modelA.localeCompare(modelB);
+  });
 
   return (
     <div className="app">
@@ -182,7 +236,7 @@ function App() {
                   <tr>
                     <th>#</th>
                     <th>Barcode</th>
-                    {/* <th>SKU</th> */}
+                    <th>Category</th>
                     <th>Model</th>
                     <th>Quantity</th>
                     <th>Status</th>
@@ -190,14 +244,14 @@ function App() {
                 </thead>
 
                 <tbody>
-                  {items.map((item, index) => (
+                  {sortedItems.map((item, index) => (
                     <tr key={`${item.barcode}-${index}`}>
                       <td>{index + 1}</td>
                       <td className="barcode">
                         {item.barcode}
                       </td>
-                      {/* <td>{item.sku}</td> */}
-                      <td>{item.description}</td>
+                      <td>{item.category || "Unknown"}</td>
+                      <td>{item.model || item.description || "Model not found"}</td>
                       <td>{item.quantity}</td>
                       <td>
                         <span
