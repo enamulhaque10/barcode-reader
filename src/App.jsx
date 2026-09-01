@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
-import { upsertScannedItem } from "./barcodeUtils";
+import { filterScannedItems, parseSkuRow, upsertScannedItem } from "./barcodeUtils";
 
-// SKU -> Model mapping is loaded from public/sku-models.csv at runtime.
-// The CSV supports the header `category,sku,model` and also tolerates tab-delimited rows.
 
 function App() {
   const [barcode, setBarcode] = useState("");
@@ -12,48 +10,15 @@ function App() {
   const [message, setMessage] = useState("");
   const [skuModelMap, setSkuModelMap] = useState({});
   const [skuMapLoaded, setSkuMapLoaded] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const inputRef = useRef(null);
-
-  const parseSkuRow = (line) => {
-    const trimmed = line.trim();
-    if (!trimmed) return null;
-
-    const tabColumns = trimmed
-      .split("\t")
-      .map((part) => part.replace(/^"|"$/g, "").trim())
-      .filter(Boolean);
-
-    if (tabColumns.length >= 3) {
-      return {
-        category: tabColumns[0],
-        sku: tabColumns[1],
-        model: tabColumns.slice(2).join(","),
-      };
-    }
-
-    const commaColumns = trimmed
-      .split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)
-      .map((part) => part.replace(/^"|"$/g, "").trim());
-
-    if (commaColumns.length >= 3) {
-      const [category, sku, ...modelParts] = commaColumns;
-      return {
-        category: category || "Unknown",
-        sku: sku || "",
-        model: modelParts.join(","),
-      };
-    }
-
-    return null;
-  };
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    // Load SKU->Model mapping from public/sku-models.csv
     const loadCsv = async () => {
       try {
         const res = await fetch("/sku-models.csv");
@@ -64,6 +29,7 @@ function App() {
         const text = await res.text();
         const map = {};
         const lines = text.split(/\r?\n/);
+        console.log(lines, 'lines');
 
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
@@ -125,10 +91,12 @@ function App() {
       for (const code of codes) {
         const skuKey = code.slice(0, 10);
         const skuEntry = skuModelMap[skuKey];
+        console.log(code, skuKey, skuEntry, 'skuEntry');
         const modelName = skuEntry?.model || "Model not found";
         const categoryName = skuEntry?.category || "Unknown";
         updated = upsertScannedItem(updated, code, skuKey, modelName, categoryName);
       }
+      console.log(updated, 'updated');
       return updated;
     });
 
@@ -165,6 +133,8 @@ function App() {
     const modelB = String(b.model || b.description || "").toLowerCase();
     return modelA.localeCompare(modelB);
   });
+
+  const filteredItems = filterScannedItems(sortedItems, searchTerm);
 
   return (
     <div className="app">
@@ -231,6 +201,17 @@ function App() {
             </div>
           ) : (
             <div className="table-wrapper">
+              <div className="table-search">
+                <label htmlFor="table-search">Search</label>
+                <input
+                  id="table-search"
+                  type="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search barcode, category, model..."
+                />
+              </div>
+
               <table>
                 <thead>
                   <tr>
@@ -244,28 +225,36 @@ function App() {
                 </thead>
 
                 <tbody>
-                  {sortedItems.map((item, index) => (
-                    <tr key={`${item.barcode}-${index}`}>
-                      <td>{index + 1}</td>
-                      <td className="barcode">
-                        {item.barcode}
-                      </td>
-                      <td>{item.category || "Unknown"}</td>
-                      <td>{item.model || item.description || "Model not found"}</td>
-                      <td>{item.quantity}</td>
-                      <td>
-                        <span
-                          className={
-                            item.status === "Found"
-                              ? "status found"
-                              : "status not-found"
-                          }
-                        >
-                          {item.status}
-                        </span>
+                  {filteredItems.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="empty-row">
+                        No items match your search.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredItems.map((item, index) => (
+                      <tr key={`${item.barcode}-${index}`}>
+                        <td>{index + 1}</td>
+                        <td className="barcode">
+                          {item.barcode}
+                        </td>
+                        <td>{item.category || "Unknown"}</td>
+                        <td>{item.model || item.description || "Model not found"}</td>
+                        <td>{item.quantity}</td>
+                        <td>
+                          <span
+                            className={
+                              item.status === "Found"
+                                ? "status found"
+                                : "status not-found"
+                            }
+                          >
+                            {item.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

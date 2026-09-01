@@ -198,6 +198,37 @@ thead {
   background: #f8fbff;
 }
 
+.table-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.table-search label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.table-search input {
+  width: min(420px, 100%);
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid #cfd8e8;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.table-search input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
 th,
 td {
   text-align: left;
@@ -247,6 +278,13 @@ tbody tr:nth-child(even) {
   color: var(--muted);
   background: #f8fbff;
   border-radius: 20px;
+}
+
+.empty-row {
+  text-align: center;
+  color: var(--muted);
+  padding: 24px 18px;
+  background: #f8fbff;
 }
 
 @media (max-width: 860px) {
