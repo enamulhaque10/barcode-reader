@@ -251,6 +251,35 @@ tbody tr:nth-child(even) {
   color: #0f172a;
 }
 
+.barcode-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.copy-button {
+  border: 1px solid #cfd8e8;
+  border-radius: 8px;
+  padding: 6px 9px;
+  color: var(--accent-dark);
+  background: #ffffff;
+  font: 600 0.78rem system-ui, sans-serif;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.copy-button:hover,
+.copy-button:focus-visible {
+  border-color: var(--accent);
+  background: #f0f8ff;
+}
+
+.copy-button:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.18);
+  outline-offset: 1px;
+}
+
 .status {
   display: inline-flex;
   align-items: center;

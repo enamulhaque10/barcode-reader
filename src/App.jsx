@@ -11,6 +11,7 @@ function App() {
   const [skuModelMap, setSkuModelMap] = useState({});
   const [skuMapLoaded, setSkuMapLoaded] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [copiedBarcode, setCopiedBarcode] = useState("");
 
   const inputRef = useRef(null);
 
@@ -29,7 +30,6 @@ function App() {
         const text = await res.text();
         const map = {};
         const lines = text.split(/\r?\n/);
-        console.log(lines, 'lines');
 
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
@@ -91,12 +91,10 @@ function App() {
       for (const code of codes) {
         const skuKey = code.slice(0, 10);
         const skuEntry = skuModelMap[skuKey];
-        console.log(code, skuKey, skuEntry, 'skuEntry');
         const modelName = skuEntry?.model || "Model not found";
         const categoryName = skuEntry?.category || "Unknown";
         updated = upsertScannedItem(updated, code, skuKey, modelName, categoryName);
       }
-      console.log(updated, 'updated');
       return updated;
     });
 
@@ -119,6 +117,16 @@ function App() {
     setItems([]);
     setMessage("");
     inputRef.current?.focus();
+  };
+
+  const copyBarcode = async (value) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedBarcode(value);
+      setTimeout(() => setCopiedBarcode(""), 1500);
+    } catch {
+      setMessage("Unable to copy the barcode.");
+    }
   };
 
   const sortedItems = [...items].sort((a, b) => {
@@ -236,7 +244,17 @@ function App() {
                       <tr key={`${item.barcode}-${index}`}>
                         <td>{index + 1}</td>
                         <td className="barcode">
-                          {item.barcode}
+                          <div className="barcode-cell">
+                            <span>{item.barcode}</span>
+                            <button
+                              type="button"
+                              className="copy-button"
+                              onClick={() => copyBarcode(item.barcode)}
+                              aria-label={`Copy barcode ${item.barcode}`}
+                            >
+                              {copiedBarcode === item.barcode ? "Copied" : "Copy"}
+                            </button>
+                          </div>
                         </td>
                         <td>{item.category || "Unknown"}</td>
                         <td>{item.model || item.description || "Model not found"}</td>
