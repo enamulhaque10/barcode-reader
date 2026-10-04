@@ -204,6 +204,7 @@ thead {
   gap: 12px;
   width: 100%;
   padding: 8px 0;
+  flex-wrap: wrap;
 }
 
 .table-search label {
@@ -214,6 +215,8 @@ thead {
 
 .table-search input {
   width: min(420px, 100%);
+  flex: 1 1 240px;
+  min-width: 0;
   min-height: 42px;
   padding: 0 14px;
   border: 1px solid #cfd8e8;
@@ -221,6 +224,28 @@ thead {
   background: #fff;
   color: var(--text);
   font-size: 0.95rem;
+}
+
+.export-button {
+  min-height: 42px;
+  margin-left: auto;
+  padding: 0 16px;
+  border: 1px solid #15803d;
+  border-radius: 12px;
+  color: #ffffff;
+  background: #15803d;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.export-button:hover:not(:disabled),
+.export-button:focus-visible {
+  background: #166534;
+}
+
+.export-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .table-search input:focus {

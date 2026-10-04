@@ -129,6 +129,32 @@ function App() {
     }
   };
 
+  const exportDisplayedItems = () => {
+    const headers = ["#", "Barcode", "Category", "Model", "Quantity", "Status"];
+    const rows = filteredItems.map((item, index) => [
+      index + 1,
+      item.barcode,
+      item.category || "Unknown",
+      item.model || item.description || "Model not found",
+      item.quantity,
+      item.status,
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map((value) => {
+        let cell = String(value ?? "");
+        if (/^[\t\r ]*[=+\-@]/.test(cell)) cell = `'${cell}`;
+        return `"${cell.replaceAll('"', '""')}"`;
+      }).join(","))
+      .join("\r\n");
+    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `scanned-items-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const sortedItems = [...items].sort((a, b) => {
     const catA = String(a.category || "Unknown").toLowerCase();
     const catB = String(b.category || "Unknown").toLowerCase();
@@ -218,6 +244,14 @@ function App() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search barcode, category, model..."
                 />
+                <button
+                  type="button"
+                  className="export-button"
+                  onClick={exportDisplayedItems}
+                  disabled={filteredItems.length === 0}
+                >
+                  Export Excel
+                </button>
               </div>
 
               <table>
