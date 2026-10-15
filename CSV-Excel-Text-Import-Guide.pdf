@@ -1,0 +1,104 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+6 0 obj
+<< /Length 1919 >>
+stream
+BT
+/F2 18 Tf
+1 0 0 1 54 744 Tm
+(CSV TO EXCEL: KEEP BARCODE AS TEXT) Tj
+/F1 11 Tf
+1 0 0 1 54 716 Tm
+(Import the CSV before Excel converts long barcodes into numbers.) Tj
+/F2 13 Tf
+1 0 0 1 54 680 Tm
+(Why this matters) Tj
+/F1 11 Tf
+1 0 0 1 54 658 Tm
+(CSV stores the barcode as digits, but opening a CSV directly can make Excel) Tj
+/F1 11 Tf
+1 0 0 1 54 642 Tm
+(treat it as a number. Excel may then display a long barcode in scientific) Tj
+/F1 11 Tf
+1 0 0 1 54 626 Tm
+(notation or change its digits. Import the Barcode column as Text instead.) Tj
+/F2 13 Tf
+1 0 0 1 54 588 Tm
+(Import steps) Tj
+/F1 11 Tf
+1 0 0 1 54 566 Tm
+(1. Open Excel to a blank workbook. Do not double-click the CSV file.) Tj
+/F1 11 Tf
+1 0 0 1 54 542 Tm
+(2. Select Data > From Text/CSV, then choose the downloaded CSV.) Tj
+/F1 11 Tf
+1 0 0 1 54 518 Tm
+(3. In the preview window, select Transform Data.) Tj
+/F1 11 Tf
+1 0 0 1 54 494 Tm
+(4. In Power Query, select the Barcode column.) Tj
+/F1 11 Tf
+1 0 0 1 54 470 Tm
+(5. Set its data type to Text \(not Whole Number or Decimal Number\).) Tj
+/F1 11 Tf
+1 0 0 1 54 454 Tm
+(   If Excel asks, choose Replace Current.) Tj
+/F1 11 Tf
+1 0 0 1 54 430 Tm
+(6. Check Applied Steps. If a Changed Type step made Barcode numeric,) Tj
+/F1 11 Tf
+1 0 0 1 54 414 Tm
+(   remove that step, then set Barcode to Text again.) Tj
+/F1 11 Tf
+1 0 0 1 54 390 Tm
+(7. Select Home > Close & Load to import the data into Excel.) Tj
+/F2 13 Tf
+1 0 0 1 54 346 Tm
+(Check the result) Tj
+/F1 11 Tf
+1 0 0 1 54 324 Tm
+(The Barcode cell should show the complete value, for example:) Tj
+/F2 14 Tf
+1 0 0 1 54 299 Tm
+(7400000039262053840301) Tj
+/F1 11 Tf
+1 0 0 1 54 265 Tm
+(If it shows something like 7.400000039E+21, close without saving and) Tj
+/F1 11 Tf
+1 0 0 1 54 249 Tm
+(repeat the import, making sure the column is Text before Close & Load.) Tj
+/F2 11 Tf
+1 0 0 1 54 209 Tm
+(Tip: After importing, save the workbook as Excel Workbook \(*.xlsx\).) Tj
+ET
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000257 00000 n 
+0000000327 00000 n 
+0000000402 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+2373
+%%EOF

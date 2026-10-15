@@ -130,29 +130,15 @@ function App() {
   };
 
   const exportDisplayedItems = () => {
-    const headers = ["#", "Barcode", "Category", "Model", "Quantity", "Status"];
-    const rows = filteredItems.map((item, index) => [
-      index + 1,
-      item.barcode,
-      item.category || "Unknown",
-      item.model || item.description || "Model not found",
-      item.quantity,
-      item.status,
-    ]);
-    const csv = [headers, ...rows]
-      .map((row) => row.map((value) => {
-        let cell = String(value ?? "");
-        if (/^[\t\r ]*[=+\-@]/.test(cell)) cell = `'${cell}`;
-        return `"${cell.replaceAll('"', '""')}"`;
-      }).join(","))
-      .join("\r\n");
-    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `scanned-items-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    import("./pdfExport")
+      .then(({ createScannedItemsPdf }) => {
+        createScannedItemsPdf(filteredItems)
+          .save(`scanned-items-${new Date().toISOString().slice(0, 10)}.pdf`);
+      })
+      .catch((error) => {
+        console.error("Failed to export scanned items as PDF:", error);
+        setMessage("Unable to export PDF. Please try again.");
+      });
   };
 
   const sortedItems = [...items].sort((a, b) => {
@@ -250,7 +236,7 @@ function App() {
                   onClick={exportDisplayedItems}
                   disabled={filteredItems.length === 0}
                 >
-                  Export Excel
+                  Export PDF
                 </button>
               </div>
 
