@@ -23,14 +23,14 @@ export function createScannedItemsPdf(items) {
   let y = 72;
 
   const drawTableHeader = () => {
-    pdf.setFillColor(37, 54, 83);
     pdf.setDrawColor(37, 54, 83);
-    pdf.setTextColor(255, 255, 255);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(9);
     let x = tableLeft;
     for (const column of columns) {
+      pdf.setFillColor(37, 54, 83);
       pdf.rect(x, y, column.width, headerHeight, "FD");
+      pdf.setTextColor(255, 255, 255);
       pdf.text(column.title, x + 6, y + 14);
       x += column.width;
     }
